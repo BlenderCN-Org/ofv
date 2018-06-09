@@ -17,6 +17,7 @@ int main()
 	int vertices[3];
 
 	vertices[0] = vertex(origin);
+	int last;
 
 	for (int i = 0; i < steps; i++)
 	{
@@ -33,10 +34,15 @@ int main()
 		else
 		{
 			vertices[2] = vertex(helper);
+			last = vertices[2];
 		}
 
 		a += step;
 	}
+	
+	vertices[1] = vertices[2];
+	vertices[2] = last;
+	face(vertices, 3);
 	
 	closeFile();
 }
