@@ -42,7 +42,7 @@ void face(int* ids, int length)
     output << "f[";
     for (int i = 0; i < length; i++)
     {
-        output << ids[i];
+        output << 'v' << ids[i];
         if (i == length - 1)
         {
             output << "]\n";
