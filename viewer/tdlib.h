@@ -1,5 +1,5 @@
 #include <math.h>
-#define pi 3.14159265358979
+#define pi 3.14159265
 
 struct vector
 {

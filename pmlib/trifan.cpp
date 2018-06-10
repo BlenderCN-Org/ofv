@@ -4,7 +4,7 @@ using namespace std;
 
 int main()
 {
-	int steps = 20;
+	int steps = 200;
 
 	float step = 2 * pi / steps;
 
