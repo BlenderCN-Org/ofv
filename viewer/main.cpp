@@ -1,4 +1,11 @@
 #include <GL/glut.h>
+
+// glm::vec3, glm::vec4, glm::ivec4, glm::mat4
+//#include <glm/glm.hpp>
+// glm::translate, glm::rotate, glm::scale, glm::perspective
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/matrix_inverse.hpp>
+
 #include <iostream>
 #include "tdlib.h"
 
@@ -19,6 +26,9 @@ int lastCoor[2];
 vector cameraPos;
 float cameraAngle;
 bool orbit = false;
+
+
+//glm::mat4 projection;
 
 //GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};  /* White diffuse light. */
 GLfloat light_position[] = {2, 2, 2, 0.0};
@@ -149,15 +159,19 @@ void mouse(int button, int state, int x, int y)
   }
 }
 
-void resizeWindow(int x, int y)
+void reshape(int width, int height)
 {
-    if (y == 0 || x == 0)
+    if (height == 0 || width == 0)
       return;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(FOV, (GLdouble)x/(GLdouble)y, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
+    gluPerspective(FOV, (GLdouble)width/(GLdouble)height, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,x,y);
+    glViewport(0,0,width,height);/*
+  glViewport(0, 0, width, height);
+  GLfloat aspectRatio = GLfloat(width)/height;
+  projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
+  glutPostRedisplay();*/
 }
 
 int main(int argc, char** argv)
@@ -173,7 +187,7 @@ int main(int argc, char** argv)
   glutMotionFunc(mouseMotion);
   glutMouseFunc(mouse);
 
-  glutReshapeFunc(resizeWindow);
+  glutReshapeFunc(reshape);
 
   init();
   glutMainLoop();
