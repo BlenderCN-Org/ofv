@@ -1,3 +1,4 @@
+#include <math.h>
 #include <GL/glut.h>
 
 // glm::vec3, glm::vec4, glm::ivec4, glm::mat4
@@ -7,30 +8,32 @@
 //#include <glm/gtc/matrix_inverse.hpp>
 
 #include <iostream>
-#include "tdlib.h"
+//#include "tdlib.h"
 
-#define rad2deg 57.29577951
-#define deg2rad 0.017453292
-
-#define CAMERA_DISTANCE 11
 #define NEAR_CLIPPING_PLANE 1
-#define FAR_CLIPPING_PLANE 50
+#define FAR_CLIPPING_PLANE 100
 #define FOV 40
-#define X_ROT_SENSITIVITY 0.3
-#define Y_ROT_SENSITIVITY 0.1
+#define ZOOM_SENSITIVITY 0.5
+#define MAX_CAMERA_DISTANCE 50
+#define MIN_CAMERA_DISTANCE 2
+#define X_ROT_SENSITIVITY 0.01
+#define Y_ROT_SENSITIVITY 0.01
+#define _360_DEG 6.283185307
+#define _90_DEG 1.570796327
 using namespace std;
 
 // camera orbit
-int lastCoor[2];
-
-vector cameraPos;
-float cameraAngle;
+float cameraDistance = 11;
+int lastScreenCoor[2]; //
 bool orbit = false;
+float cameraTarget[3] = {0.0, 0.0, 0.0};
+float cameraPosition[3];
+float theta = 0, phi = 0;
 
 
 //glm::mat4 projection;
 
-//GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};  /* White diffuse light. */
+GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};  /* White diffuse light. */
 GLfloat light_position[] = {2, 2, 2, 0.0};
 GLfloat n[6][3] = {  /* Normals for the 6 faces of a cube. */
   {-1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {1.0, 0.0, 0.0},
@@ -43,9 +46,9 @@ GLfloat v[8][3];  /* Will be filled in with X,Y,Z vertexes. */
 
 void calculateCameraPosition()
 {
-  cameraPos.y = sin(cameraAngle) * CAMERA_DISTANCE;
-  cameraPos.z = 0;
-  cameraPos.x = cos(cameraAngle) * CAMERA_DISTANCE;
+  cameraPosition[0] = cameraTarget[0] + cameraDistance * sin(theta) * cos(phi);
+  cameraPosition[1] = cameraTarget[1] + cameraDistance * sin(phi);
+  cameraPosition[2] = cameraTarget[2] + cameraDistance * cos(theta) * cos(phi);
 }
 
 void drawBox()
@@ -66,6 +69,12 @@ void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   drawBox();
+  calculateCameraPosition();
+  //glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],
+            cameraTarget[0], cameraTarget[1], cameraTarget[2],
+            0, 1, 0);
   glutSwapBuffers();
 }
 
@@ -83,7 +92,7 @@ void init()
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHTING);
 
-  //glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   /* Set background color */
@@ -91,7 +100,6 @@ void init()
 
   /* Use depth buffering for hidden surface elimination. */
   glEnable(GL_DEPTH_TEST);
-
 
   /* Setup the view of the cube. */
   glMatrixMode(GL_PROJECTION);
@@ -103,59 +111,66 @@ void init()
 
   glMatrixMode(GL_MODELVIEW);
 
-  cameraAngle = 30 * deg2rad;
   calculateCameraPosition();
-  gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z,  /* eye is at (0,0,5) */
-            0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-            0.0, 1.0, 0.);      /* up is in positive Y direction */
-
-  /* Adjust cube position to be asthetic angle. */
-  //glTranslatef(0.0, 0.0, -1.0);
-  //glRotatef(60, 1.0, 0.0, 0.0);
-  //glRotatef(-20, 0.0, 0.0, 1.0);
+  glLoadIdentity();
+  gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],
+            cameraTarget[0], cameraTarget[1], cameraTarget[2],
+            0, 1, 0);
 }
 
 void mouseMotion(int x, int y)
 {
   if (orbit)
   {
-    int dX = x - lastCoor[0];
-    int dY = y - lastCoor[1];
+    int dX = x - lastScreenCoor[0];
+    int dY = y - lastScreenCoor[1];
 
-    glMatrixMode(GL_MODELVIEW);
-    glRotatef(dX * X_ROT_SENSITIVITY, 0, 1, 0);
-    glMatrixMode(GL_PROJECTION);
+    theta -= dX * X_ROT_SENSITIVITY;
+    phi += dY * Y_ROT_SENSITIVITY;
 
+    // clamp
+    if (theta > _360_DEG)
+      theta = 0;
+    else if (theta < 0)
+      theta = _360_DEG;
+    if (phi > _90_DEG)
+      phi = _90_DEG;
+    else if (phi < -_90_DEG)
+      phi = -_90_DEG;
 
-    glMatrixMode(GL_PROJECTION);
-    glRotatef(dY * Y_ROT_SENSITIVITY, 1, 0, 0);
-    glTranslatef(0, -dY * Y_ROT_SENSITIVITY * 0.2, 0);
-
-    /*cameraAngle += dY * Y_ROT_SENSITIVITY;
-    calculateCameraPosition();
-    gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z,
-            0.0, 0.0, 0.0,
-            0.0, 1.0, 0.);*/
-
+    lastScreenCoor[0] = x;
+    lastScreenCoor[1] = y;
     glutPostRedisplay();
-    lastCoor[0] = x;
-    lastCoor[1] = y;
   }
 }
 void mouse(int button, int state, int x, int y)
 {
-  if (button == GLUT_MIDDLE_BUTTON) 
+  if (button == GLUT_LEFT_BUTTON) 
   { 
     if (state == GLUT_DOWN)
     {
       orbit = true;
-      lastCoor[0] = x;
-      lastCoor[1] = y;
+      lastScreenCoor[0] = x;
+      lastScreenCoor[1] = y;
     }
     else if (state == GLUT_UP)
     {
       orbit = false;
     }
+  }
+  else if (button == 3) // zoom in
+  {
+    cameraDistance -= ZOOM_SENSITIVITY;
+    if (cameraDistance < MIN_CAMERA_DISTANCE)
+      cameraDistance = MIN_CAMERA_DISTANCE;
+    glutPostRedisplay();
+  }
+  else if (button == 4)
+  {
+    cameraDistance += ZOOM_SENSITIVITY; // zoom out
+    if (cameraDistance > MAX_CAMERA_DISTANCE)
+      cameraDistance = MAX_CAMERA_DISTANCE;
+    glutPostRedisplay();
   }
 }
 
@@ -167,11 +182,7 @@ void reshape(int width, int height)
     glLoadIdentity();
     gluPerspective(FOV, (GLdouble)width/(GLdouble)height, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
     glMatrixMode(GL_MODELVIEW);
-    glViewport(0,0,width,height);/*
-  glViewport(0, 0, width, height);
-  GLfloat aspectRatio = GLfloat(width)/height;
-  projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
-  glutPostRedisplay();*/
+    glViewport(0, 0, width,height);
 }
 
 int main(int argc, char** argv)
