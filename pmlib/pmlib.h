@@ -29,7 +29,7 @@ int vertex(float x, float y, float z)
     vertexCounter++;
     return vertexCounter - 1;
 }
-int vertex(vector pos)
+int vertex(vec3 pos)
 {
     checkObjectAndFile();
     output << 'v' << vertexCounter << '[' << pos.x << ',' << pos.y << ',' << pos.z << "]\n";
