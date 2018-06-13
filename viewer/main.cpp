@@ -30,51 +30,45 @@ struct vertex
 	string id;
 	vec3 pos;
 };
+struct face
+{
+	vector<vertex> verts;
+	vec3 normal;
+};
 std::ostream& operator<<(std::ostream& os, const vertex& v)
 {
     return os << "id: " << v.id << ", pos: " << v.pos;
 }
 
-vector<string> faces;
+bool invertNormals = false;
+
+// loaded from file
+vector<face> faces;
 vector<vertex> vertices;
 
 // camera orbit
 float cameraDistance = 11;
 int lastScreenCoor[2]; //
 bool orbit = false;
-float cameraTarget[3] = {0.0, 0.0, 0.0};
-float cameraPosition[3];
+vec3 cameraTarget;
+vec3 cameraPosition;
 float theta = 0, phi = 0;
 
+// extra
+int vertexCount = 0;
+int faceCount = 0;
 
-//glm::mat4 projection;
-
+//scene
 GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};	/* White diffuse light. */
 GLfloat light_position[] = {0.5, 0.5, 1, 0};
 GLfloat ambient_light[] = {.8, .8, .8, 1};
 
 void calculateCameraPosition()
 {
-	cameraPosition[0] = cameraTarget[0] + cameraDistance * sin(theta) * cos(phi);
-	cameraPosition[1] = cameraTarget[1] + cameraDistance * sin(phi);
-	cameraPosition[2] = cameraTarget[2] + cameraDistance * cos(theta) * cos(phi);
+	cameraPosition.x = cameraTarget.x + cameraDistance * sin(theta) * cos(phi);
+	cameraPosition.y = cameraTarget.y + cameraDistance * sin(phi);
+	cameraPosition.z = cameraTarget.z + cameraDistance * cos(theta) * cos(phi);
 }
-
-/*
-void drawBox()
-{
-	for (int i = 0; i < 6; i++) // for each face
-	{
-		glColor3f(0.9f, 0.9f, 0.9f);
-		glBegin(GL_QUADS);
-		glNormal3fv(&n[i][0]);
-		glVertex3fv(&v[faces[i][0]][0]);
-		glVertex3fv(&v[faces[i][1]][0]);
-		glVertex3fv(&v[faces[i][2]][0]);
-		glVertex3fv(&v[faces[i][3]][0]);
-		glEnd();
-	}
-}*/
 
 vertex findVertex(string theid)
 {
@@ -91,98 +85,30 @@ void drawModel()
 {
 	for (auto i : faces)
 	{
-		vector<vertex> faceVerts;
-		int a = 0;
-		for (int j = 0; j < i.length(); j++)
-		{
-			if (i[j] == ',')
-			{
-				faceVerts.push_back(findVertex(i.substr(a, j - a)));
-				a = j + 1;
-			}
-		}
-		faceVerts.push_back(findVertex(i.substr(a)));
-
-		vec3 oneVector = faceVerts[1].pos - faceVerts[0].pos;
-		vec3 anotherVector = faceVerts[2].pos - faceVerts[1].pos;
-		vec3 normal = oneVector * anotherVector; //cross
-		normal = normal.normalized();
-
-		//cout << "polygon\n";
 		glBegin(GL_POLYGON);
-			glNormal3f(normal.x, normal.y, normal.z);
-			for (auto h : faceVerts)
+			glNormal3f(i.normal.x, i.normal.y, i.normal.z);
+			for (auto h : i.verts)
 			{
 				//cout << h << endl;
 				glVertex3f(h.pos.x, h.pos.y, h.pos.z);
 			}
 		glEnd();
 	}
-
-	/*
-	glBegin(GL_POLYGON);
-		glNormal3f(0, 0, 1);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 1, 0);
-		glVertex3f(0.5, 1, 0);
-		glVertex3f(1, 0.5, 0);
-		glVertex3f(1, 0, 0);
-	glEnd();
-	glBegin(GL_POLYGON);
-		glNormal3f(0, 0, 1);
-		glVertex3f(0, 0, 1);
-		glVertex3f(0, 1, 1);
-		glVertex3f(0.5, 1, 0);
-		glVertex3f(1, 0.5, 0);
-		glVertex3f(1, 0, 1);
-	glEnd();
-	*/
 }
-
-/*void drawSnowMan() {
-
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	glTranslatef(0.0f ,0.75f, 0.0f);
-	glutSolidSphere(0.75f,20,20);
-
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glutSolidSphere(0.25f,20,20);
-
-	glPushMatrix();
-	glColor3f(0.0f,0.0f,0.0f);
-	glTranslatef(0.05f, 0.10f, 0.18f);
-	glutSolidSphere(0.05f,10,10);
-	glTranslatef(-0.1f, 0.0f, 0.0f);
-	glutSolidSphere(0.05f,10,10);
-	glPopMatrix();
-
-	glColor3f(1.0f, 0.5f , 0.5f);
-	glutSolidCone(0.08f,0.5f,10,2);
-}*/
 
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawModel();
-	/*for(int i = -5; i < 5; i++)
-	{
-		for(int j=-5; j < 5; j++)
-		{
-			glPushMatrix();
-			glTranslatef(i*10.0,-1,j * 10.0);
-			drawSnowMan();
-			glPopMatrix();
-		}
-	}*/
 
 	calculateCameraPosition();
 	//glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],
-				cameraTarget[0], cameraTarget[1], cameraTarget[2],
+	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
+				cameraTarget.x, cameraTarget.y, cameraTarget.z,
 				0, 1, 0);
+
 	glutSwapBuffers();
 }
 
@@ -214,9 +140,9 @@ void init()
 
 	calculateCameraPosition();
 	glLoadIdentity();
-	gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],
-						cameraTarget[0], cameraTarget[1], cameraTarget[2],
-						0, 1, 0);
+	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
+			cameraTarget.x, cameraTarget.y, cameraTarget.z,
+			0, 1, 0);
 }
 
 void mouseMotion(int x, int y)
@@ -320,42 +246,70 @@ void readFile(char** argv)
 			vtx.pos.z = stof(str.substr(i, j - i));
 
 			vertices.push_back(vtx);
+
+			vertexCount++;
+
+			cameraTarget += vtx.pos; // para centrar la vista
 		}
 		else if (str[0] == 'f')
 		{
+			face theFace;
 			int i = 1;
 			while (str[i] != '[')
 				i++;
 			i++;
-			int j = i + 1;
+			int j = i;
 			while (str[j] != ']')
+			{
+				if (str[j] == ',')
+				{
+					theFace.verts.push_back(findVertex(str.substr(i, j - i)));
+					i = j + 1;
+				}
 				j++;
-			faces.push_back(str.substr(i, j - i));
+			}
+			theFace.verts.push_back(findVertex(str.substr(i)));
+
+			//calculate normal
+			vec3 a = theFace.verts[1].pos - theFace.verts[0].pos;
+			vec3 b = theFace.verts[2].pos - theFace.verts[1].pos;
+			if (invertNormals)
+			{
+				theFace.normal = b * a; // cross prod
+			}
+			else
+			{
+				theFace.normal = a * b; // cross prod
+			}
+			theFace.normal = theFace.normal.normalized();
+			faces.push_back(theFace);
+
+			faceCount++;
 		}
 	}
 }
 
 int main(int argc, char** argv)
 {
-	if (argc != 2)
+	cameraTarget.x = cameraTarget.y = cameraTarget.z = 0;
+
+	if (argc == 1)
 	{
 		cout << "Invalid arguments" << endl;
 		return -1;
 	}
+	if (argc > 2)
+	{
+		invertNormals = true;
+	}
+
 
 	readFile(argv);
 
-	/*
-	cout << "vertices:\n";
-	for (auto i : vertices)
-	{
-		cout << i << endl;
-	}
-	cout << "\nfaces:\n";
-	for (auto i : faces)
-	{
-		cout << i << endl;
-	}*/
+	// average
+	cameraTarget.x = cameraTarget.x / vertexCount;
+	cameraTarget.y = cameraTarget.y / vertexCount;
+	cameraTarget.z = cameraTarget.z / vertexCount;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
