@@ -54,9 +54,9 @@ vec3 cameraTarget;
 vec3 cameraPosition;
 float theta = 0, phi = 0;
 
-// extra
-int vertexCount = 0;
-int faceCount = 0;
+// centering camera
+vec3 maxPos;
+vec3 minPos;
 
 //scene
 GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};	/* White diffuse light. */
@@ -89,7 +89,6 @@ void drawModel()
 			glNormal3f(i.normal.x, i.normal.y, i.normal.z);
 			for (auto h : i.verts)
 			{
-				//cout << h << endl;
 				glVertex3f(h.pos.x, h.pos.y, h.pos.z);
 			}
 		glEnd();
@@ -103,7 +102,7 @@ void display()
 	drawModel();
 
 	calculateCameraPosition();
-	//glMatrixMode(GL_MODELVIEW);
+
 	glLoadIdentity();
 	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
 				cameraTarget.x, cameraTarget.y, cameraTarget.z,
@@ -247,9 +246,20 @@ void readFile(char** argv)
 
 			vertices.push_back(vtx);
 
-			vertexCount++;
+			// centering view
+			if (vtx.pos.x > maxPos.x)
+				maxPos.x = vtx.pos.x;
+			if (vtx.pos.y > maxPos.y)
+				maxPos.y = vtx.pos.y;
+			if (vtx.pos.z > maxPos.z)
+				maxPos.z = vtx.pos.z;
 
-			cameraTarget += vtx.pos; // para centrar la vista
+			if (vtx.pos.x < minPos.x)
+				minPos.x = vtx.pos.x;
+			if (vtx.pos.y < minPos.y)
+				minPos.y = vtx.pos.y;
+			if (vtx.pos.z < minPos.z)
+				minPos.z = vtx.pos.z;
 		}
 		else if (str[0] == 'f')
 		{
@@ -283,15 +293,14 @@ void readFile(char** argv)
 			}
 			theFace.normal = theFace.normal.normalized();
 			faces.push_back(theFace);
-
-			faceCount++;
 		}
 	}
 }
 
 int main(int argc, char** argv)
 {
-	cameraTarget.x = cameraTarget.y = cameraTarget.z = 0;
+	minPos.x = minPos.y = minPos.z = 0;
+	maxPos.x = maxPos.y = maxPos.z = 0;
 
 	if (argc == 1)
 	{
@@ -303,13 +312,10 @@ int main(int argc, char** argv)
 		invertNormals = true;
 	}
 
-
 	readFile(argv);
 
-	// average
-	cameraTarget.x = cameraTarget.x / vertexCount;
-	cameraTarget.y = cameraTarget.y / vertexCount;
-	cameraTarget.z = cameraTarget.z / vertexCount;
+	// calculate camera target position
+	cameraTarget = (maxPos + minPos) * 0.5;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
