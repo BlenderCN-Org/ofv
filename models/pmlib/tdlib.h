@@ -52,6 +52,17 @@ const vec3 r(1,0,0);
 const vec3 u(0,1,0);
 const vec3 b(0,0,1);
 
+const vec3 z(0,0,0);
+
+bool operator==(const vec3& a, const vec3& b)
+{
+    if (a.x == b.x && a.y == b.y && a.z == b.z)
+    {
+        return true;
+    }
+    return false;
+}
+
 // vector addition
 vec3 operator+(const vec3& a, const vec3& b)
 {
