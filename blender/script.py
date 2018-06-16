@@ -1,5 +1,5 @@
 
-import bpy, bmesh, random, math
+import bpy, bmesh
 from mathutils import Vector
 
 def createObject(name):
