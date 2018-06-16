@@ -1,5 +1,5 @@
 #include <iostream>
-#include "pmlib.h"
+#include "pmlib/pmlib.h"
 using namespace std;
 
 int main()
@@ -8,15 +8,14 @@ int main()
 
 	float step = 2 * pi / steps;
 
-	float radius = 5;
+	float radius = 1;
 	float a = 0;
 
-	vec3 origin;
 	vec3 helper;
 
 	int vertices[3];
 
-	vertices[0] = vertex(origin);
+	vertices[0] = vertex(0, 0, 0);
 	//int last;
 
 	float height = 0;
@@ -27,21 +26,21 @@ int main()
 		helper.y = height;
 		helper.z = sin(a) * radius;
 
-		height += 0.05;
+		height += 0.005;
 
 		if (i > 0)
 		{
-			vertices[2] = vertices[1];
-			vertices[1] = vertex(helper);
+			vertices[1] = vertices[2];
+			vertices[2] = vertex(helper);
 			face(vertices, 3);
 		}
 		else
 		{
-			vertices[1] = vertex(helper);
+			vertices[2] = vertex(helper);
 			//last = vertices[2];
 		}
 
-		a += step;
+		a -= step;
 	}
 	
 	//vertices[1] = vertices[2];

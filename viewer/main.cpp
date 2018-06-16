@@ -35,9 +35,19 @@ struct face
 	vector<vertex> verts;
 	vec3 normal;
 };
+
 std::ostream& operator<<(std::ostream& os, const vertex& v)
 {
-    return os << "id: " << v.id << ", pos: " << v.pos;
+    return os << "(id: " << v.id << ", pos: " << v.pos << ')';
+}
+std::ostream& operator<<(std::ostream& os, const face& f)
+{
+	os << "(vertices: ";
+	for (auto i : f.verts)
+	{
+		os << i;
+	}
+    return os << ", normal: " << f.normal << ')';
 }
 
 bool invertNormals = false;
@@ -263,6 +273,7 @@ void readFile(char** argv)
 		}
 		else if (str[0] == 'f')
 		{
+			//cout << "face: \n";
 			face theFace;
 			int i = 1;
 			while (str[i] != '[')
@@ -273,12 +284,14 @@ void readFile(char** argv)
 			{
 				if (str[j] == ',')
 				{
+					//cout << findVertex(str.substr(i, j - i)) << endl;
 					theFace.verts.push_back(findVertex(str.substr(i, j - i)));
 					i = j + 1;
 				}
 				j++;
 			}
-			theFace.verts.push_back(findVertex(str.substr(i)));
+			//cout << findVertex(str.substr(i, j - i)) << endl;
+			theFace.verts.push_back(findVertex(str.substr(i, j - i)));
 
 			//calculate normal
 			vec3 a = theFace.verts[1].pos - theFace.verts[0].pos;
@@ -313,6 +326,10 @@ int main(int argc, char** argv)
 	}
 
 	readFile(argv);
+	/*for (auto i : faces)
+	{
+		cout << i << '\n';
+	}*/
 
 	// calculate camera target position
 	cameraTarget = (maxPos + minPos) * 0.5;
@@ -322,7 +339,7 @@ int main(int argc, char** argv)
 	glEnable(GL_MULTISAMPLE);
 
 	glutInitWindowSize(600, 600);
-	glutCreateWindow("wawawawa");
+	glutCreateWindow("wawawa");
 	glutDisplayFunc(display);
 
 	glutMotionFunc(mouseMotion);

@@ -53,6 +53,22 @@ void face(int* ids, int length)
         }
     }
 }
+void face(int* ids, int length, int start)
+{
+    output << "f[";
+    for (int i = 0; i < length; i++)
+    {
+        output << 'v' << ids[i + start];
+        if (i == length - 1)
+        {
+            output << "]\n";
+        }
+        else
+        {
+            output << ',';
+        }
+    }
+}
 
 void closeFile()
 {

@@ -15,7 +15,7 @@ def createObject(name):
     bm = bmesh.new()
     return
 
-filepath = "/home/santaclos/Desktop/ofv/pmlib/output.ofv"
+filepath = "/home/santaclos/Desktop/ofv/models/output.ofv"
 
 f = open(filepath, 'r', encoding='utf-8')
 data = f.read()
@@ -44,7 +44,7 @@ for line in lines:
         inBrackets = split[1][0 : split[1].index(']')]
         ss = inBrackets.split(',')
         if verticalIsY:
-            verticesDic[split[0]] = bm.verts.new(Vector((float(ss[0]),float(ss[2]),float(ss[1]))))
+            verticesDic[split[0]] = bm.verts.new(Vector((float(ss[0]),-float(ss[2]),float(ss[1]))))
         else:
             verticesDic[split[0]] = bm.verts.new(Vector((float(ss[0]),float(ss[1]),float(ss[2]))))
 
