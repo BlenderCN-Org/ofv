@@ -2,7 +2,7 @@
 #include "pmlib/pmlib.h"
 using namespace std;
 
-void cylinder(vec3 from, vec3 to, float radius, int polygons)
+void cylinder(vec3 from, vec3 to, float radius, int polygons, bool caps)
 {
 	vec3 dir = to - from;
 
@@ -45,8 +45,11 @@ void cylinder(vec3 from, vec3 to, float radius, int polygons)
 	quad[0] = cap1[0];
 	quad[3] = cap2[0];
 	face(quad, 4);
-	face(cap1, polygons);
-	face(cap2, polygons, true); // true for inverting normal
+	if (caps)
+	{
+		face(cap1, polygons);
+		face(cap2, polygons, true); // true for inverting normal
+	}
 }
 
 int main()
@@ -54,14 +57,14 @@ int main()
 	int steps = 8;
 	float stepHeight = 0.5;
 	float radius = 0.06;
-	int polygons = 5;
+	int polygons = 12;
 	float width = 1;
 
-	cylinder(r * (width / 2), r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons);
-	cylinder(-r * (width / 2), -r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons);
+	cylinder(r * (width / 2), r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons, true);
+	cylinder(-r * (width / 2), -r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons, true);
 
 	for (float i = stepHeight; i < stepHeight * (steps + 1); i += stepHeight)
 	{
-		cylinder(-r * width * 0.5 + u * i, r * width * 0.5 + u * i, radius, polygons);
+		cylinder(-r * width * 0.5 + u * i, r * width * 0.5 + u * i, radius, polygons, false);
 	}
 }
