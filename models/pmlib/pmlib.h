@@ -103,6 +103,29 @@ void face(int* ids, int length, int start)
         }
     }
 }
+void faceSeq(int* ids, int count, int vertsPerFace)
+{
+    output << "f[";
+    for (int i = 0; i < count; i++)
+    {
+        output << 'v' << ids[i];
+        if ((i + 1) % vertsPerFace == 0)
+        {
+            if (i == count - 1)
+            {
+                output << "]\n";
+            }
+            else
+            {
+                output << "]\nf[";
+            }
+        }
+        else
+        {
+            output << ',';
+        }
+    }
+}
 
 void closeFile()
 {

@@ -226,5 +226,6 @@ int main()
 	}
 
 
+	closeFile();
 	//flower(b + u*5, 15, 15, petals);
 }

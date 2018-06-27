@@ -2,14 +2,8 @@
 #include "pmlib/pmlib.h"
 using namespace std;
 
-int main()
+void spiral(int steps, float stepHeight, float thickness, float innerRadius, float outerRadius, float stepAngle)
 {
-	float innerRadius = .5;
-	float outerRadius = 4;
-	int steps = 20;
-	float stepHeight = 0.2;
-	float thickness = 0.3;
-	float stepAngle = 2 * pi / 50; //360 / steps
 	float currentAngle = 0;
 
 	int outerSide[7]; //tris
@@ -82,6 +76,116 @@ int main()
 		pos.x = cos(currentAngle) * outerRadius;
 		pos.z = sin(currentAngle) * outerRadius;
 	}
-	
+}
+
+void ushape(vec3 origin, vec3 dir, int steps, float stepHeight, float stepSize, float stairsWidth, float midSize, float thickness, int stepsPerSegment)
+{
+	dir.y = 0;
+	vec3 localRight = dir * u;
+	dir = dir.normalized();
+	localRight = localRight.normalized();
+
+	int quad[4];
+	int thQuad[4];
+	int sideTri[3];
+	int midVertices[20];
+
+	quad[0] = vertex(origin);
+	quad[1] = vertex(origin + localRight * stairsWidth);
+
+	thQuad[0] = vertex(origin - u * thickness);
+	thQuad[1] = vertex(origin + localRight * stairsWidth - u * thickness);
+
+	for (int i = 1; i <= steps; i++)
+	{
+		origin += u * stepHeight;
+		quad[2] = vertex(origin + localRight * stairsWidth);
+		quad[3] = vertex(origin);
+
+		sideTri[2] = quad[1];
+		int leftSideTemp = quad[0];
+
+		face(quad, 4);
+
+		quad[0] = quad[3];
+		quad[1] = quad[2];
+
+		origin += dir * stepSize;
+		quad[2] = vertex(origin + localRight * stairsWidth);
+		quad[3] = vertex(origin);
+
+		thQuad[2] = vertex(origin + localRight * stairsWidth - u * thickness);
+		thQuad[3] = vertex(origin - u * thickness);
+
+		face(quad, 4);
+		face(thQuad, 4, true);
+
+		//right side
+
+		sideTri[0] = thQuad[1];
+		sideTri[1] = thQuad[2];
+		face(sideTri, 3);
+
+		sideTri[0] = sideTri[1];
+		sideTri[1] = quad[2];
+		face(sideTri, 3);
+
+		sideTri[0] = sideTri[1];
+		sideTri[1] = quad[1];
+		face(sideTri, 3);
+
+		//left side
+
+		sideTri[2] = leftSideTemp;
+		sideTri[0] = thQuad[0];
+		sideTri[1] = thQuad[3];
+		face(sideTri, 3, true);
+
+		sideTri[0] = sideTri[1];
+		sideTri[1] = quad[3];
+		face(sideTri, 3, true);
+
+		sideTri[0] = sideTri[1];
+		sideTri[1] = quad[0];
+		face(sideTri, 3, true);
+
+		if (i % stepsPerSegment == 0) // mid
+		{
+			midVertices[0] = midVertices[12] = thQuad[3];
+			midVertices[1] = midVertices[18] = quad[3];
+
+			midVertices[5] = midVertices[2] = midVertices[17] = vertex(origin + dir * midSize);
+			midVertices[4] = midVertices[3] = midVertices[13] = vertex(origin + dir * midSize - u * thickness);
+
+			origin += localRight * stairsWidth * 2;
+			localRight = -localRight;
+			dir = -dir;
+			quad[0] = vertex(origin);
+			quad[1] = vertex(origin + localRight * stairsWidth);
+			thQuad[0] = vertex(origin - u * thickness);
+			thQuad[1] = vertex(origin + localRight * stairsWidth - u * thickness);
+
+			midVertices[10] = midVertices[19] = quad[0];
+			midVertices[11] = midVertices[15] = thQuad[0];
+
+			midVertices[9] = midVertices[6] = midVertices[16] = vertex(origin - dir * midSize);
+			midVertices[8] = midVertices[7] = midVertices[14] = vertex(origin - dir * midSize - u * thickness);
+
+			faceSeq(midVertices, 20, 4);
+		}
+		else
+		{
+			quad[0] = quad[3];
+			quad[1] = quad[2];
+			thQuad[0] = thQuad[3];
+			thQuad[1] = thQuad[2];
+		}
+	}
+}
+
+int main()
+{
+	//spiral(60, 0.2, 0.3, 0.5, 4, 2 * pi / 50);
+	ushape(z, -b, 40, 0.1, 0.2, 1, 1, 0.1, 15);
 	closeFile();
 }
