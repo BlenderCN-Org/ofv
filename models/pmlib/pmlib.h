@@ -85,7 +85,7 @@ void face(int* ids, int length, bool invert)
                 output << ',';
             }
         }
-    }    
+    }
 }
 void face(int* ids, int length, int start)
 {
@@ -100,6 +100,40 @@ void face(int* ids, int length, int start)
         else
         {
             output << ',';
+        }
+    }
+}
+void face(int* ids, int length, int start, bool invert)
+{
+    output << "f[";
+    if (invert)
+    {
+        for (int i = length - 1; i > -1; i--)
+        {
+            output << 'v' << ids[i + start];
+            if (i == 0)
+            {
+                output << "]\n";
+            }
+            else
+            {
+                output << ',';
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < length; i++)
+        {
+            output << 'v' << ids[i + start];
+            if (i == length - 1)
+            {
+                output << "]\n";
+            }
+            else
+            {
+                output << ',';
+            }
         }
     }
 }
