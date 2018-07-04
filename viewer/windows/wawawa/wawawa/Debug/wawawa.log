@@ -1,0 +1,11 @@
+﻿  main.cpp
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(53): warning C4838: conversion from 'double' to 'GLfloat' requires a narrowing conversion
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(53): warning C4305: 'initializing': truncation from 'double' to 'GLfloat'
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(114): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(143): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(144): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(150): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(152): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(154): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\santaclos\desktop\wawawavs\wawawa\wawawa\main.cpp(71): warning C4715: 'findVertex': not all control paths return a value
+  wawawa.vcxproj -> C:\Users\santaclos\Desktop\wawawavs\wawawa\Debug\wawawa.exe
