@@ -1,16 +1,10 @@
 #include <GL/glut.h>
 
-// glm::vec3, glm::vec4, glm::ivec4, glm::mat4
-//#include <glm/glm.hpp>
-// glm::translate, glm::rotate, glm::scale, glm::perspective
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/matrix_inverse.hpp>
-
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <vector>
-#include "tdlib.h"
+#include "cppmodel.h"
+#include "binder.h"
 
 #define NEAR_CLIPPING_PLANE 1
 #define FAR_CLIPPING_PLANE 100
@@ -23,37 +17,6 @@
 #define _360_DEG 6.283185307
 #define _90_DEG 1.57
 using namespace std;
-
-struct vertex
-{
-	string id;
-	vec3 pos;
-};
-struct face
-{
-	vector<vertex> verts;
-	vec3 normal;
-};
-
-std::ostream& operator<<(std::ostream& os, const vertex& v)
-{
-    return os << "(id: " << v.id << ", pos: " << v.pos << ')';
-}
-std::ostream& operator<<(std::ostream& os, const face& f)
-{
-	os << "(vertices: ";
-	for (auto i : f.verts)
-	{
-		os << i;
-	}
-    return os << ", normal: " << f.normal << ')';
-}
-
-bool invertNormals = false;
-
-// loaded from file
-vector<face> faces;
-vector<vertex> vertices;
 
 // camera orbit
 float cameraDistance = 11;
@@ -79,17 +42,6 @@ void calculateCameraPosition()
 	cameraPosition.z = cameraTarget.z + cameraDistance * cos(theta) * cos(phi);
 }
 
-vertex findVertex(string theid)
-{
-	for (auto i : vertices)
-	{
-		if (i.id.compare(theid) == 0)
-		{
-			return i;
-		}
-	}
-}
-
 void drawModel()
 {
 	for (auto i : faces)
@@ -107,6 +59,10 @@ void drawModel()
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	clearModel();
+
+	generateModel();
 
 	drawModel();
 
@@ -209,6 +165,53 @@ void mouse(int button, int state, int x, int y)
 	}
 }
 
+void specialFunc(int key, int x, int y)
+{
+	switch(key)
+	{
+		case GLUT_KEY_UP:
+			if (parameters[currentParameter].type == 'f')
+			{
+				float* p = (float*) parameters[currentParameter].variable;
+				*p += 1;
+			}
+			else
+			{
+				int* p = (int*) parameters[currentParameter].variable;
+				*p += 1;
+			}
+			break;	
+		case GLUT_KEY_DOWN:
+			if (parameters[currentParameter].type == 'f')
+			{
+				float* p = (float*) parameters[currentParameter].variable;
+				*p -= 1;
+			}
+			else
+			{
+				int* p = (int*) parameters[currentParameter].variable;
+				*p -= 1;
+			}
+			break;
+		case GLUT_KEY_LEFT:
+			currentParameter--;
+			if (currentParameter == -1)
+			{
+				currentParameter = parameters.size() - 1;
+			}
+			break;
+		case GLUT_KEY_RIGHT:
+			currentParameter++;
+			if (currentParameter == parameters.size())
+			{
+				currentParameter = 0;
+			}
+			break;
+	}
+
+	glutPostRedisplay();
+}
+
 void reshape(int width, int height)
 {
 		if (height == 0 || width == 0)
@@ -220,115 +223,12 @@ void reshape(int width, int height)
 		glViewport(0, 0, width,height);
 }
 
-void readFile(char** argv)
-{
-	ifstream ifs (argv[1], ifstream::in);
-	string str;
-	while (getline(ifs, str))
-	{
-		if (str[0] == 'v')
-		{
-			vertex vtx;
-			int i = 1;
-			while (str[i] != '[')
-				i++;
-
-			vtx.id = str.substr(0, i);
-
-			i++;
-			int j = i + 1;
-			int p = 0;
-			while (str[j] != ']')
-			{
-				if (str[j] == ',')
-				{
-					if (p == 0)
-						vtx.pos.x = stof(str.substr(i, j - i));
-					else if (p == 1)
-						vtx.pos.y = stof(str.substr(i, j - i));
-					p++;
-					i = j + 1;
-				}
-				j++;
-			}
-			vtx.pos.z = stof(str.substr(i, j - i));
-
-			vertices.push_back(vtx);
-
-			// centering view
-			if (vtx.pos.x > maxPos.x)
-				maxPos.x = vtx.pos.x;
-			if (vtx.pos.y > maxPos.y)
-				maxPos.y = vtx.pos.y;
-			if (vtx.pos.z > maxPos.z)
-				maxPos.z = vtx.pos.z;
-
-			if (vtx.pos.x < minPos.x)
-				minPos.x = vtx.pos.x;
-			if (vtx.pos.y < minPos.y)
-				minPos.y = vtx.pos.y;
-			if (vtx.pos.z < minPos.z)
-				minPos.z = vtx.pos.z;
-		}
-		else if (str[0] == 'f')
-		{
-			//cout << "face: \n";
-			face theFace;
-			int i = 1;
-			while (str[i] != '[')
-				i++;
-			i++;
-			int j = i;
-			while (str[j] != ']')
-			{
-				if (str[j] == ',')
-				{
-					//cout << findVertex(str.substr(i, j - i)) << endl;
-					theFace.verts.push_back(findVertex(str.substr(i, j - i)));
-					i = j + 1;
-				}
-				j++;
-			}
-			//cout << findVertex(str.substr(i, j - i)) << endl;
-			theFace.verts.push_back(findVertex(str.substr(i, j - i)));
-
-			//calculate normal
-			vec3 a = theFace.verts[1].pos - theFace.verts[0].pos;
-			vec3 b = theFace.verts[2].pos - theFace.verts[1].pos;
-			if (invertNormals)
-			{
-				theFace.normal = b * a; // cross prod
-			}
-			else
-			{
-				theFace.normal = a * b; // cross prod
-			}
-			theFace.normal = theFace.normal.normalized();
-			faces.push_back(theFace);
-		}
-	}
-}
-
 int main(int argc, char** argv)
 {
+	bindParameters();
+
 	minPos.x = minPos.y = minPos.z = 0;
 	maxPos.x = maxPos.y = maxPos.z = 0;
-
-	if (argc == 1)
-	{
-		cout << "Invalid arguments" << endl;
-		return -1;
-	}
-	if (argc > 2)
-	{
-		invertNormals = true;
-	}
-
-	readFile(argv);
-	/*for (auto i : faces)
-	{
-		cout << i << '\n';
-	}*/
 
 	// calculate camera target position
 	cameraTarget = (maxPos + minPos) * 0.5;
@@ -343,10 +243,11 @@ int main(int argc, char** argv)
 
 	glutMotionFunc(mouseMotion);
 	glutMouseFunc(mouse);
+	glutSpecialFunc(specialFunc);
 
 	glutReshapeFunc(reshape);
 
-	init();
+	init();	
 	glutMainLoop();
 
 	return 0;
