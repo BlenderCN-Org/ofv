@@ -4,6 +4,17 @@
 #include <string>
 #include <fstream>
 #include "cppmodel.h"
+
+struct parameter
+{
+	string name;
+	char type;
+	void* variable;
+};
+
+int currentParameter = 0;
+std::vector<parameter> parameters;
+
 #include "binder.h"
 
 #define NEAR_CLIPPING_PLANE 1
@@ -16,7 +27,6 @@
 #define Y_ROT_SENSITIVITY 0.01
 #define _360_DEG 6.283185307
 #define _90_DEG 1.57
-using namespace std;
 
 // camera orbit
 float cameraDistance = 11;
