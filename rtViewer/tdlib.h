@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 #define pi 3.14159265358979
 
 struct vec3
@@ -52,7 +53,18 @@ const vec3 r(1,0,0);
 const vec3 u(0,1,0);
 const vec3 b(0,0,1);
 
-// vector addition
+const vec3 z(0,0,0);
+
+bool operator==(const vec3& a, const vec3& b)
+{
+    if (a.x == b.x && a.y == b.y && a.z == b.z)
+    {
+        return true;
+    }
+    return false;
+}
+
+// vector add
 vec3 operator+(const vec3& a, const vec3& b)
 {
     vec3 res(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -64,7 +76,7 @@ void operator+=(vec3& a, const vec3& b)
     a.y += b.y;
     a.z += b.z;
 }
-// vector subtraction
+// vector subs
 vec3 operator-(const vec3& a, const vec3& b)
 {
     vec3 res(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -76,7 +88,7 @@ void operator-=(vec3& a, const vec3& b)
     a.y -= b.y;
     a.z -= b.z;
 }
-// scalar product
+// float product
 vec3 operator*(const vec3& a, const float& factor)
 {
     vec3 res(a.x * factor, a.y * factor, a.z * factor);
@@ -94,7 +106,7 @@ vec3 operator-(const vec3& v)
     vec3 res(v.x * -1, v.y * -1, v.z * -1);
     return res;
 }
-// for printing
+// cout
 std::ostream& operator<<(std::ostream& os, const vec3& v)
 {
     return os << '(' << v.x << ", " << v.y << ", " << v.z << ')';

@@ -7,6 +7,10 @@ using namespace std;
 
 int vertexCounter = 0;
 
+// centering camera
+vec3 maxCameraTargetPos;
+vec3 minCameraTargetPos;
+
 struct vertexS
 {
     string id;
@@ -38,6 +42,19 @@ void calcNormal(faceS& theFace)
 
 int vertex(float x, float y, float z)
 {
+    if (maxCameraTargetPos.x < x)
+        maxCameraTargetPos.x = x;
+    if (maxCameraTargetPos.y < y)
+        maxCameraTargetPos.y = y;
+    if (maxCameraTargetPos.z < z)
+        maxCameraTargetPos.z = z;
+    if (minCameraTargetPos.x > x)
+        minCameraTargetPos.x = x;
+    if (minCameraTargetPos.y > y)
+        minCameraTargetPos.y = y;
+    if (minCameraTargetPos.z > z)
+        minCameraTargetPos.z = z;
+    
     vertexS vtx;
     vtx.id =  vertexCounter;
     vtx.pos.x = x;
@@ -51,6 +68,19 @@ int vertex(float x, float y, float z)
 }
 int vertex(vec3 pos)
 {
+    if (maxCameraTargetPos.x < pos.x)
+        maxCameraTargetPos.x = pos.x;
+    if (maxCameraTargetPos.y < pos.y)
+        maxCameraTargetPos.y = pos.y;
+    if (maxCameraTargetPos.z < pos.z)
+        maxCameraTargetPos.z = pos.z;
+    if (minCameraTargetPos.x > pos.x)
+        minCameraTargetPos.x = pos.x;
+    if (minCameraTargetPos.y > pos.y)
+        minCameraTargetPos.y = pos.y;
+    if (minCameraTargetPos.z > pos.z)
+        minCameraTargetPos.z = pos.z;
+
     vertexS vtx;
     vtx.id =  vertexCounter;
     vtx.pos.x = pos.x;
@@ -143,9 +173,4 @@ void faceSeq(int* ids, int count, int vertsPerFace)
             curFce++;
         }
     }
-}
-
-void closeFile()
-{
-    //output.close();
 }

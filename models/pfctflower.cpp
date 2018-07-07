@@ -1,17 +1,14 @@
-#include <iostream>
-#include "pmlib/pmlib.h"
-using namespace std;
+#include "rtpmlib.h"
 
-int main()
+float radius = 2;
+float height = 2;
+int hResolution = 4;
+int vResolution = 60;
+int sides = 8;
+
+void generateModel()
 {
-	float radius = 2;
-	float height = 2;
-
-	int hResolution = 120;
-	int vResolution = 60;
-	int sides = 8;
-
-	float weight = 0;
+	float currentRadius = radius;
 	float angleStep = 2 * pi / hResolution;
 	float yStep = height / vResolution;
 
@@ -26,9 +23,9 @@ int main()
 		currentAngle = 0;
 		for (int j = 0; j < hResolution; j++)
 		{
-			vertices[i][j] = vertex((cos(currentAngle) - cos(currentAngle * sides) / sides) * radius,
+			vertices[i][j] = vertex((cos(currentAngle) - cos(currentAngle * sides) / sides) * currentRadius,
 									currentHeight,
-									(sin(currentAngle) - sin(currentAngle * sides) / sides) * radius);
+									(sin(currentAngle) - sin(currentAngle * sides) / sides) * currentRadius);
 
 			if (j > 0 && i > 0)
 			{
@@ -50,7 +47,7 @@ int main()
 			face(currentQuad, 4);
 		}
 
-		radius /= 1.07;
+		currentRadius /= 1.07;
 		currentHeight -= yStep;
 	}
 }

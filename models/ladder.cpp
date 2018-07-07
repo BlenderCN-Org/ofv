@@ -1,6 +1,10 @@
-#include <iostream>
-#include "pmlib/pmlib.h"
-using namespace std;
+#include "rtpmlib.h"
+
+int steps = 8;
+float stepHeight = 0.5;
+float radius = 0.06;
+int polygons = 12;
+float width = 1;
 
 void cylinder(vec3 from, vec3 to, float radius, int polygons, bool caps)
 {
@@ -52,14 +56,8 @@ void cylinder(vec3 from, vec3 to, float radius, int polygons, bool caps)
 	}
 }
 
-int main()
+void generateModel()
 {
-	int steps = 8;
-	float stepHeight = 0.5;
-	float radius = 0.06;
-	int polygons = 12;
-	float width = 1;
-
 	cylinder(r * (width / 2), r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons, true);
 	cylinder(-r * (width / 2), -r * (width / 2) + u * (stepHeight * (steps + 1)), radius, polygons, true);
 

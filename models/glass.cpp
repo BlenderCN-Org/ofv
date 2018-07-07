@@ -1,18 +1,16 @@
-#include <iostream>
-#include "pmlib/pmlib.h"
-using namespace std;
+#include "rtpmlib.h"
 
-int main()
+float radius = 2;
+float height = 4;
+int sides = 6;
+
+float scaleFactor = 1.3;
+
+int vRes = 60;
+int hRes = 60;
+
+void generateModel()
 {
-	float radius = 2;
-	float height = 4;
-	int sides = 6;
-
-	float scaleFactor = 1.3;
-
-	int vRes = 60;
-	int hRes = 60;
-
 	float vStep = height / vRes;
 
 	float angleStep = pi * 2 / hRes;

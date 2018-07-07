@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
 #include "cppmodel.h"
 
 struct parameter
@@ -36,9 +37,6 @@ vec3 cameraTarget;
 vec3 cameraPosition;
 float theta = 0, phi = 0;
 
-// centering camera
-vec3 maxPos;
-vec3 minPos;
 
 //scene
 GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};	/* White diffuse light. */
@@ -72,7 +70,9 @@ void display()
 
 	clearModel();
 
+	maxCameraTargetPos = minCameraTargetPos = z;
 	generateModel();
+	cameraTarget = (maxCameraTargetPos + minCameraTargetPos) * 0.5;
 
 	drawModel();
 
@@ -175,6 +175,7 @@ void mouse(int button, int state, int x, int y)
 	}
 }
 
+// parameter handling
 void specialFunc(int key, int x, int y)
 {
 	switch(key)
@@ -237,11 +238,8 @@ int main(int argc, char** argv)
 {
 	bindParameters();
 
-	minPos.x = minPos.y = minPos.z = 0;
-	maxPos.x = maxPos.y = maxPos.z = 0;
-
-	// calculate camera target position
-	cameraTarget = (maxPos + minPos) * 0.5;
+	minCameraTargetPos.x = minCameraTargetPos.y = minCameraTargetPos.z = 0;
+	maxCameraTargetPos.x = maxCameraTargetPos.y = maxCameraTargetPos.z = 0;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
