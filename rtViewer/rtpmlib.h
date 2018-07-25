@@ -23,12 +23,23 @@ struct faceS
 };
 
 map <int, vertexS> mapping;
-vector<faceS> faces;
+//vector<faceS> faces;
 
 void clearModel()
 {
     mapping.clear();
-    faces.clear();
+    //faces.clear();
+}
+
+void drawFace(faceS& theFace)
+{
+    glBegin(GL_POLYGON);
+        glNormal3f(theFace.normal.x, theFace.normal.y, theFace.normal.z);
+        for (auto h : theFace.verts)
+        {
+            glVertex3f(h.pos.x, h.pos.y, h.pos.z);
+        }
+    glEnd();
 }
 
 void calcNormal(faceS& theFace)
@@ -66,8 +77,10 @@ int vertex(float x, float y, float z)
     vertexCounter++;
     return vertexCounter - 1;
 }
+
 int vertex(vec3 pos)
 {
+    // camera centering
     if (maxCameraTargetPos.x < pos.x)
         maxCameraTargetPos.x = pos.x;
     if (maxCameraTargetPos.y < pos.y)
@@ -101,7 +114,8 @@ void face(int* ids, int length)
         fce.verts.push_back(mapping[ids[i]]);
     }
     calcNormal(fce);
-    faces.push_back(fce);
+    drawFace(fce);
+    //faces.push_back(fce);
 }
 void face(int* ids, int length, bool invert)
 {
@@ -113,7 +127,8 @@ void face(int* ids, int length, bool invert)
             fce.verts.push_back(mapping[ids[i]]);
         }
         calcNormal(fce);
-        faces.push_back(fce);
+        drawFace(fce);
+        //faces.push_back(fce);
     }
     else
     {
@@ -122,7 +137,8 @@ void face(int* ids, int length, bool invert)
             fce.verts.push_back(mapping[ids[i]]);
         }
         calcNormal(fce);
-        faces.push_back(fce);
+        drawFace(fce);
+        //faces.push_back(fce);
     }
 }
 void face(int* ids, int length, int start)
@@ -133,7 +149,8 @@ void face(int* ids, int length, int start)
         fce.verts.push_back(mapping[ids[i + start]]);
     }
     calcNormal(fce);
-    faces.push_back(fce);
+    drawFace(fce);
+    //faces.push_back(fce);
 }
 void face(int* ids, int length, int start, bool invert)
 {
@@ -144,8 +161,6 @@ void face(int* ids, int length, int start, bool invert)
         {
             fce.verts.push_back(mapping[ids[i + start]]);
         }
-        calcNormal(fce);
-        faces.push_back(fce);
     }
     else
     {
@@ -153,9 +168,9 @@ void face(int* ids, int length, int start, bool invert)
         {
             fce.verts.push_back(mapping[ids[i + start]]);
         }
-        calcNormal(fce);
-        faces.push_back(fce);
     }
+    calcNormal(fce);
+    drawFace(fce);
 }
 void faceSeq(int* ids, int count, int vertsPerFace)
 {
@@ -169,7 +184,8 @@ void faceSeq(int* ids, int count, int vertsPerFace)
         if ((i + 1) % vertsPerFace == 0)
         {
             calcNormal(fce[curFce]);
-            faces.push_back(fce[curFce]);
+            drawFace(fce[curFce]);
+            //faces.push_back(fce[curFce]);
             curFce++;
         }
     }

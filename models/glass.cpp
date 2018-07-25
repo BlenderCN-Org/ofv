@@ -1,6 +1,6 @@
 #include "rtpmlib.h"
 
-float radius = 2;
+float radius = 1;
 float height = 4;
 int sides = 6;
 

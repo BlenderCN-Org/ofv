@@ -50,20 +50,6 @@ void calculateCameraPosition()
 	cameraPosition.z = cameraTarget.z + cameraDistance * cos(theta) * cos(phi);
 }
 
-void drawModel()
-{
-	for (auto i : faces)
-	{
-		glBegin(GL_POLYGON);
-			glNormal3f(i.normal.x, i.normal.y, i.normal.z);
-			for (auto h : i.verts)
-			{
-				glVertex3f(h.pos.x, h.pos.y, h.pos.z);
-			}
-		glEnd();
-	}
-}
-
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -71,10 +57,10 @@ void display()
 	clearModel();
 
 	maxCameraTargetPos = minCameraTargetPos = z;
-	generateModel();
+	generateModel(); // in cppmodel.h
 	cameraTarget = (maxCameraTargetPos + minCameraTargetPos) * 0.5;
 
-	drawModel();
+	//drawModel();
 
 	calculateCameraPosition();
 
@@ -184,7 +170,7 @@ void specialFunc(int key, int x, int y)
 			if (parameters[currentParameter].type == 'f')
 			{
 				float* p = (float*) parameters[currentParameter].variable;
-				*p += 1;
+				*p += 0.1;
 			}
 			else
 			{
@@ -196,7 +182,7 @@ void specialFunc(int key, int x, int y)
 			if (parameters[currentParameter].type == 'f')
 			{
 				float* p = (float*) parameters[currentParameter].variable;
-				*p -= 1;
+				*p -= 0.1;
 			}
 			else
 			{
@@ -244,6 +230,7 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
 	glEnable(GL_MULTISAMPLE);
+	glutSetSamples(16);
 
 	glutInitWindowSize(600, 600);
 	glutCreateWindow("wawawa");

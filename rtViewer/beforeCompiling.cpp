@@ -14,6 +14,16 @@ bool stringMatchesString(string a, string b, int position)
   return true;
 }
 
+bool stringContainsChar(string theString, char theChar)
+{
+	for (int i = 0; i < theString.length(); i++)
+	{
+		if (theString[i] == theChar)
+			return true;
+	}
+	return false;
+}
+
 string getParameterName(string fC, int i)
 {
 	string res;
@@ -22,7 +32,7 @@ string getParameterName(string fC, int i)
 		i++;
 	}
 	i++;
-	while (fC[i] != ' ' && fC[i] != '=')
+	while (fC[i] != ' ' && fC[i] != '=' && fC[i] != ';')
 	{
 		res += fC[i];
 		i++;
@@ -49,6 +59,10 @@ int main(int argc, char** argv)
 		if (stringMatchesString(fileContents, "float", i))
 		{
 			string name = getParameterName(fileContents, i);
+			if (stringContainsChar(name, '('))
+			{
+				continue;
+			}
 			binderFile << "\tparameter " << name << "Parameter;\n";
 			binderFile << '\t' << name << "Parameter.name = \"" << name << "\";\n";
 			binderFile << '\t' << name << "Parameter.type = 'f';\n";
@@ -58,6 +72,10 @@ int main(int argc, char** argv)
 		else if (stringMatchesString(fileContents, "int", i))
 		{
 			string name = getParameterName(fileContents, i);
+			if (stringContainsChar(name, '('))
+			{
+				continue;
+			}
 			binderFile << "\tparameter " << name << "Parameter;\n";
 			binderFile << '\t' << name << "Parameter.name = \"" << name << "\";\n";
 			binderFile << '\t' << name << "Parameter.type = 'i';\n";

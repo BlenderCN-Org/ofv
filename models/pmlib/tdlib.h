@@ -106,8 +106,3 @@ vec3 operator-(const vec3& v)
     vec3 res(v.x * -1, v.y * -1, v.z * -1);
     return res;
 }
-// cout
-std::ostream& operator<<(std::ostream& os, const vec3& v)
-{
-    return os << '(' << v.x << ", " << v.y << ", " << v.z << ')';
-}
