@@ -1,10 +1,5 @@
-#include <iostream>
-#include "pmlib/pmlib.h"
-
-using namespace std;
-
-const float deg2rad = 0.017453292;
-const float rad2deg = 57.29577951;
+#include "rtpmlib.h"
+#define DEG2RAD 0.017453292
 
 int petals = 8;
 float petalWidth = 0.5;
@@ -93,7 +88,7 @@ void flower(vec3 origin, vec3 localUp, int petals)
 	{
 		vec3 dir = localRight * cos(theta) - localBack * sin(theta);	
 		float angle = rdm(minPetalAngle, maxPetalAngle);
-		petal(origin + dir * radius, dir * cos(angle*deg2rad) + localUp * sin(angle*deg2rad), localUp, petalWidth, petalLength, petalHeight, petalResZ, petalResX);
+		petal(origin + dir * radius, dir * cos(angle*DEG2RAD) + localUp * sin(angle*DEG2RAD), localUp, petalWidth, petalLength, petalHeight, petalResZ, petalResX);
 		theta += angleStep;
 	}
 
@@ -205,7 +200,7 @@ void stem(vec3 origin, vec3 direction, float stepLength, float radius, int sides
 	flower(currentOrigin - current*stepLength, current, petals);
 }
 
-int main()
+void generateModel()
 {
 	srand(time(0));
 
@@ -226,6 +221,6 @@ int main()
 	}
 
 
-	closeFile();
+	//closeFile();
 	//flower(b + u*5, 15, 15, petals);
 }

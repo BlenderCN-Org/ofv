@@ -6,18 +6,155 @@
 
 #include "cppmodel.h"
 
+int viewport_window, parameter_window;
+
+#define PM_WINDOW_MARGIN_V 10
+#define PM_WINDOW_MARGIN_H 30
+#define PM_WINDOW_ROW_HEIGHT 20
+
 struct parameter
 {
-	string name;
+	std::string name;
 	char type;
 	void* variable;
+	parameter(std::string name, char type, void* variable)
+	{
+		this->name = name;
+		this->type = type;
+		this->variable = variable;
+	}
 };
+std::vector<parameter> parametersVector;
+bool manipulatingParameter = false;
+int paramWindowManipulatingIndex;
+int parameterWindowLastPosX;
 
-int currentParameter = 0;
-std::vector<parameter> parameters;
+int parameterWindowSize[2];
+
+void parameterWindowDrawText(const char* text, int length, int x, int y)
+{
+	glMatrixMode(GL_PROJECTION);
+	double* matrix = new double[16];
+	glGetDoublev(GL_PROJECTION_MATRIX, matrix);
+	glLoadIdentity();
+	glOrtho(0, parameterWindowSize[0], 0, parameterWindowSize[1], -5, 5);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glPushMatrix();
+	glLoadIdentity();
+	glRasterPos2i(x, y);
+	for (int i = 0; i < length; i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, text[i]);
+	}
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixd(matrix);
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void parameterWindowDisplay()
+{ 
+    glClearColor( 0.3, 0.3, 0.3, 1 );  // (In fact, this is the default.)
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    int currentY = parameterWindowSize[1] - PM_WINDOW_MARGIN_V - PM_WINDOW_ROW_HEIGHT * 0.6;
+
+    for (auto i : parametersVector)
+    {
+    	parameterWindowDrawText(i.name.c_str(), i.name.length(), PM_WINDOW_MARGIN_H, currentY);
+    //std::cout << currentY << std::endl;
+    	currentY -= PM_WINDOW_ROW_HEIGHT;
+    }
+    
+    glutSwapBuffers(); // Required to copy color buffer onto the screen.
+ 
+}
+void parameterWindowMouse(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON) 
+	{ 
+		if (state == GLUT_DOWN)
+		{
+			//std::cout << x << ", " << y << std::endl;
+
+			y -= PM_WINDOW_MARGIN_V; // margin
+
+			y = (y < 0 ? 0 : y);
+			int index = y / PM_WINDOW_ROW_HEIGHT;
+			index = (index >= parametersVector.size() ? parametersVector.size() - 1 : index);
+
+			//std::cout << parametersVector[index].name << " pressed" << std::endl;
+
+			if (parametersVector[index].type == 'b')
+			{
+				bool* pointer = (bool*) parametersVector[index].variable;
+				*pointer = !*pointer;
+				std::cout << parametersVector[index].name << " = " << *pointer << std::endl;
+				glutSetWindow(viewport_window);
+				glutPostRedisplay();
+			}
+			else // float and int
+			{
+				manipulatingParameter = true;
+				paramWindowManipulatingIndex = index;
+				parameterWindowLastPosX = x;
+			}
+		}
+		else if (state == GLUT_UP)
+		{
+			manipulatingParameter = false;
+		}
+	}
+}
+
+void parameterWindowMouseMotion(int x, int y)
+{
+	if (!manipulatingParameter)
+		return;
+
+	int dX = x - parameterWindowLastPosX;
+
+	if (parametersVector[paramWindowManipulatingIndex].type == 'f')
+	{
+		float* pointer = (float*) parametersVector[paramWindowManipulatingIndex].variable;
+		*pointer += 0.1 * dX;
+		std::cout << parametersVector[paramWindowManipulatingIndex].name << " = " << *pointer << std::endl;
+		glutSetWindow(viewport_window);
+		glutPostRedisplay();
+	}
+	else if (parametersVector[paramWindowManipulatingIndex].type == 'i')
+	{
+		int* pointer = (int*) parametersVector[paramWindowManipulatingIndex].variable;
+		*pointer += dX * 0.5;
+		std::cout << parametersVector[paramWindowManipulatingIndex].name << " = " << *pointer << std::endl;
+		glutSetWindow(viewport_window);
+		glutPostRedisplay();
+	}
+
+	parameterWindowLastPosX = x;
+}
+
+void GetParameterWindowSize(int* size)
+{
+	size[1] = parametersVector.size() * PM_WINDOW_ROW_HEIGHT + PM_WINDOW_MARGIN_V * 2;
+	size[0] = 3;
+
+	for (auto i : parametersVector)
+	{
+		if (i.name.length() > size[0])
+			size[0] = i.name.length();
+	}
+
+	size[0] *= 9;
+	size[0] += PM_WINDOW_MARGIN_H * 2;
+
+	std::cout << size[0] << ", " << size[1] << std::endl;
+}
 
 #include "binder.h"
 
+#define CENTER_CAMERA 0
 #define NEAR_CLIPPING_PLANE 1
 #define FAR_CLIPPING_PLANE 100
 #define FOV 40
@@ -58,9 +195,8 @@ void display()
 
 	maxCameraTargetPos = minCameraTargetPos = z;
 	generateModel(); // in cppmodel.h
-	cameraTarget = (maxCameraTargetPos + minCameraTargetPos) * 0.5;
-
-	//drawModel();
+	if (CENTER_CAMERA)
+		cameraTarget = (maxCameraTargetPos + minCameraTargetPos) * 0.5;
 
 	calculateCameraPosition();
 
@@ -161,54 +297,6 @@ void mouse(int button, int state, int x, int y)
 	}
 }
 
-// parameter handling
-void specialFunc(int key, int x, int y)
-{
-	switch(key)
-	{
-		case GLUT_KEY_UP:
-			if (parameters[currentParameter].type == 'f')
-			{
-				float* p = (float*) parameters[currentParameter].variable;
-				*p += 0.1;
-			}
-			else
-			{
-				int* p = (int*) parameters[currentParameter].variable;
-				*p += 1;
-			}
-			break;	
-		case GLUT_KEY_DOWN:
-			if (parameters[currentParameter].type == 'f')
-			{
-				float* p = (float*) parameters[currentParameter].variable;
-				*p -= 0.1;
-			}
-			else
-			{
-				int* p = (int*) parameters[currentParameter].variable;
-				*p -= 1;
-			}
-			break;
-		case GLUT_KEY_LEFT:
-			currentParameter--;
-			if (currentParameter == -1)
-			{
-				currentParameter = parameters.size() - 1;
-			}
-			break;
-		case GLUT_KEY_RIGHT:
-			currentParameter++;
-			if (currentParameter == parameters.size())
-			{
-				currentParameter = 0;
-			}
-			break;
-	}
-
-	glutPostRedisplay();
-}
-
 void reshape(int width, int height)
 {
 		if (height == 0 || width == 0)
@@ -223,6 +311,7 @@ void reshape(int width, int height)
 int main(int argc, char** argv)
 {
 	bindParameters();
+	GetParameterWindowSize(parameterWindowSize);
 
 	minCameraTargetPos.x = minCameraTargetPos.y = minCameraTargetPos.z = 0;
 	maxCameraTargetPos.x = maxCameraTargetPos.y = maxCameraTargetPos.z = 0;
@@ -230,19 +319,27 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
 	glEnable(GL_MULTISAMPLE);
-	glutSetSamples(16);
 
 	glutInitWindowSize(600, 600);
-	glutCreateWindow("wawawa");
+	viewport_window = glutCreateWindow("viewport");
 	glutDisplayFunc(display);
 
 	glutMotionFunc(mouseMotion);
 	glutMouseFunc(mouse);
-	glutSpecialFunc(specialFunc);
 
 	glutReshapeFunc(reshape);
 
-	init();	
+	init();
+
+	glutInitDisplayMode(GLUT_SINGLE);    // Use single color buffer and no depth buffer.
+    glutInitWindowSize(parameterWindowSize[0], parameterWindowSize[1]);         // Size of display area, in pixels.
+    glutInitWindowPosition(100, 100);     // Location of window in screen coordinates.
+    parameter_window = glutCreateWindow("parameters"); // Parameter is window title.
+    glutDisplayFunc(parameterWindowDisplay);            // Called when the window needs to be redrawn.
+    
+	glutMouseFunc(parameterWindowMouse);
+	glutMotionFunc(parameterWindowMouseMotion);
+
 	glutMainLoop();
 
 	return 0;

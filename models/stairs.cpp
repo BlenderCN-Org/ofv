@@ -1,5 +1,7 @@
 #include "rtpmlib.h"
 
+int stepCount = 50;
+
 float stepSize = 0.15;
 float stepHeight = 0.07;
 float stepAngle = 2 * pi / 30;
@@ -518,7 +520,7 @@ int generateModel()
 //		ushape(-b * sin(i * aStep) * 5 + r * cos(i * aStep) * 5, b * sin(i * aStep) - r * cos(i * aStep), 45, 1, 1, 15);
 //	}
 	//spiral(-b * 10, 60, 0.1, 0.2, 0.5, 1.5, );
-	ushape(z, -b, 63, 1, 1, 15);
+	ushape(z, -b, stepCount, 1, 1, 15);
 
 	//twistedRailingPipe(z, 40, 4, 0.5, 0.2, 0.02);
 

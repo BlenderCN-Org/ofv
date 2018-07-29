@@ -63,11 +63,7 @@ int main(int argc, char** argv)
 			{
 				continue;
 			}
-			binderFile << "\tparameter " << name << "Parameter;\n";
-			binderFile << '\t' << name << "Parameter.name = \"" << name << "\";\n";
-			binderFile << '\t' << name << "Parameter.type = 'f';\n";
-			binderFile << '\t' << name << "Parameter.variable = &" << name << ";\n";
-			binderFile << '\t' << "parameters.push_back(" << name << "Parameter);\n";
+			binderFile << "\tparametersVector.push_back(parameter(\"" << name << "\", 'f', &" << name << "));\n";
 		}
 		else if (stringMatchesString(fileContents, "int", i))
 		{
@@ -76,11 +72,16 @@ int main(int argc, char** argv)
 			{
 				continue;
 			}
-			binderFile << "\tparameter " << name << "Parameter;\n";
-			binderFile << '\t' << name << "Parameter.name = \"" << name << "\";\n";
-			binderFile << '\t' << name << "Parameter.type = 'i';\n";
-			binderFile << '\t' << name << "Parameter.variable = &" << name << ";\n";
-			binderFile << '\t' << "parameters.push_back(" << name << "Parameter);\n";
+			binderFile << "\tparametersVector.push_back(parameter(\"" << name << "\", 'i', &" << name << "));\n";
+		}
+		else if (stringMatchesString(fileContents, "bool", i))
+		{
+			string name = getParameterName(fileContents, i);
+			if (stringContainsChar(name, '('))
+			{
+				continue;
+			}
+			binderFile << "\tparametersVector.push_back(parameter(\"" << name << "\", 'b', &" << name << "));\n";
 		}
 		else if (stringMatchesString(fileContents, "(", i))
 		{

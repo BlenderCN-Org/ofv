@@ -2,29 +2,21 @@
 
 void bindParameters()
 {
-	parameter radiusParameter;
-	radiusParameter.name = "radius";
-	radiusParameter.type = 'f';
-	radiusParameter.variable = &radius;
-	parameters.push_back(radiusParameter);
-	parameter heightParameter;
-	heightParameter.name = "height";
-	heightParameter.type = 'f';
-	heightParameter.variable = &height;
-	parameters.push_back(heightParameter);
-	parameter hResolutionParameter;
-	hResolutionParameter.name = "hResolution";
-	hResolutionParameter.type = 'i';
-	hResolutionParameter.variable = &hResolution;
-	parameters.push_back(hResolutionParameter);
-	parameter vResolutionParameter;
-	vResolutionParameter.name = "vResolution";
-	vResolutionParameter.type = 'i';
-	vResolutionParameter.variable = &vResolution;
-	parameters.push_back(vResolutionParameter);
-	parameter sidesParameter;
-	sidesParameter.name = "sides";
-	sidesParameter.type = 'i';
-	sidesParameter.variable = &sides;
-	parameters.push_back(sidesParameter);
+	parametersVector.push_back(parameter("stepCount", 'i', &stepCount));
+	parametersVector.push_back(parameter("stepSize", 'f', &stepSize));
+	parametersVector.push_back(parameter("stepHeight", 'f', &stepHeight));
+	parametersVector.push_back(parameter("stepAngle", 'f', &stepAngle));
+	parametersVector.push_back(parameter("thickness", 'f', &thickness));
+	parametersVector.push_back(parameter("createRailings", 'b', &createRailings));
+	parametersVector.push_back(parameter("createSideCap", 'b', &createSideCap));
+	parametersVector.push_back(parameter("railingHOffset", 'f', &railingHOffset));
+	parametersVector.push_back(parameter("railingVOffset", 'f', &railingVOffset));
+	parametersVector.push_back(parameter("railingWidth", 'f', &railingWidth));
+	parametersVector.push_back(parameter("railingThickness", 'f', &railingThickness));
+	parametersVector.push_back(parameter("railingPipeEachXSteps", 'i', &railingPipeEachXSteps));
+	parametersVector.push_back(parameter("railingPipeHeight", 'f', &railingPipeHeight));
+	parametersVector.push_back(parameter("railingPipeRes", 'i', &railingPipeRes));
+	parametersVector.push_back(parameter("railingPipeRadius", 'f', &railingPipeRadius));
+	parametersVector.push_back(parameter("railingPipeTwistAngle", 'f', &railingPipeTwistAngle));
+	parametersVector.push_back(parameter("railingPipePolygonSides", 'i', &railingPipePolygonSides));
 }
