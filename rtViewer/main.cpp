@@ -9,19 +9,70 @@
 int viewport_window, parameter_window;
 
 #define PM_WINDOW_MARGIN_V 10
-#define PM_WINDOW_MARGIN_H 30
-#define PM_WINDOW_ROW_HEIGHT 20
+#define PM_WINDOW_MARGIN_RIGHT 80
+#define PM_WINDOW_MARGIN_LEFT 20
+#define PM_WINDOW_ROW_HEIGHT 40
 
 struct parameter
 {
 	std::string name;
 	char type;
 	void* variable;
-	parameter(std::string name, char type, void* variable)
+	float helper;
+	float sensitivity;
+	float max;
+	float min;
+
+	parameter(std::string name, char type, void* variable, float sensitivity, float min, float max)
 	{
 		this->name = name;
 		this->type = type;
 		this->variable = variable;
+		this->sensitivity = sensitivity;
+		this->max = max;
+		this->min = min;
+
+		if (type == 'i')
+			this->helper = (float) *((int*) variable);
+	}
+
+	void modify(int dX) // delta X in pixels
+	{
+		if (this->type == 'f')
+		{
+			float* pointer = (float*) this->variable;
+			*pointer += dX * this->sensitivity;
+
+			// clamp
+			if (this->min != this->max)
+			{
+				if (*pointer > this->max)
+					*pointer = this->max;
+				if (*pointer < this->min)
+					*pointer = this->min;
+			}
+		}
+		else if (this->type == 'i')
+		{
+			this->helper += dX * this->sensitivity;
+
+			// clamp
+			if (this->min != this->max)
+			{
+				if (this->helper > this->max)
+					this->helper = this->max;
+				if (this->helper < this->min)
+					this->helper = this->min;
+			}
+
+			int* pointer = (int*) this->variable;
+			*pointer = (int) this->helper;
+		}
+		else
+		{
+			bool* asdf = (bool*) this->variable;
+			*asdf = !*asdf;
+		}
 	}
 };
 std::vector<parameter> parametersVector;
@@ -58,11 +109,29 @@ void parameterWindowDisplay()
     glClearColor( 0.3, 0.3, 0.3, 1 );  // (In fact, this is the default.)
     glClear( GL_COLOR_BUFFER_BIT );
 
-    int currentY = parameterWindowSize[1] - PM_WINDOW_MARGIN_V - PM_WINDOW_ROW_HEIGHT * 0.6;
+    int currentY = parameterWindowSize[1] - PM_WINDOW_MARGIN_V - PM_WINDOW_ROW_HEIGHT * 0.3;
 
     for (auto i : parametersVector)
     {
-    	parameterWindowDrawText(i.name.c_str(), i.name.length(), PM_WINDOW_MARGIN_H, currentY);
+    	parameterWindowDrawText(i.name.c_str(), i.name.length(), PM_WINDOW_MARGIN_LEFT, currentY);
+    	if (i.type == 'f')
+    	{
+    		float* var = (float*) i.variable;
+    		std::string s = std::to_string(*var);
+	    	parameterWindowDrawText(s.c_str(), s.length(), PM_WINDOW_MARGIN_LEFT, currentY - PM_WINDOW_ROW_HEIGHT * 0.4);
+    	}
+    	else if (i.type == 'i')
+    	{
+    		int* var = (int*) i.variable;
+    		std::string s = std::to_string(*var);
+	    	parameterWindowDrawText(s.c_str(), s.length(), PM_WINDOW_MARGIN_LEFT, currentY - PM_WINDOW_ROW_HEIGHT * 0.4);
+    	}
+    	else
+    	{
+    		bool* var = (bool*) i.variable;
+	    	parameterWindowDrawText(*var ? "true" : "false", *var ? 4 : 5, PM_WINDOW_MARGIN_LEFT, currentY - PM_WINDOW_ROW_HEIGHT * 0.4);
+    	}
+
     //std::cout << currentY << std::endl;
     	currentY -= PM_WINDOW_ROW_HEIGHT;
     }
@@ -88,9 +157,9 @@ void parameterWindowMouse(int button, int state, int x, int y)
 
 			if (parametersVector[index].type == 'b')
 			{
-				bool* pointer = (bool*) parametersVector[index].variable;
-				*pointer = !*pointer;
-				std::cout << parametersVector[index].name << " = " << *pointer << std::endl;
+				parametersVector[index].modify(0);
+
+				glutPostRedisplay();
 				glutSetWindow(viewport_window);
 				glutPostRedisplay();
 			}
@@ -115,22 +184,27 @@ void parameterWindowMouseMotion(int x, int y)
 
 	int dX = x - parameterWindowLastPosX;
 
-	if (parametersVector[paramWindowManipulatingIndex].type == 'f')
+	if (parametersVector[paramWindowManipulatingIndex].type != 'b')
+	{
+		parametersVector[paramWindowManipulatingIndex].modify(dX);
+		glutPostRedisplay();
+		glutSetWindow(viewport_window);
+		glutPostRedisplay();
+	}
+
+	/*if (parametersVector)
 	{
 		float* pointer = (float*) parametersVector[paramWindowManipulatingIndex].variable;
-		*pointer += 0.1 * dX;
-		std::cout << parametersVector[paramWindowManipulatingIndex].name << " = " << *pointer << std::endl;
-		glutSetWindow(viewport_window);
+		*pointer += dX * parametersVector[paramWindowManipulatingIndex].sensitivity;
 		glutPostRedisplay();
 	}
 	else if (parametersVector[paramWindowManipulatingIndex].type == 'i')
 	{
+		parametersVector[paramWindowManipulatingIndex].helper += dX * parametersVector[paramWindowManipulatingIndex].sensitivity;
 		int* pointer = (int*) parametersVector[paramWindowManipulatingIndex].variable;
-		*pointer += dX * 0.5;
-		std::cout << parametersVector[paramWindowManipulatingIndex].name << " = " << *pointer << std::endl;
-		glutSetWindow(viewport_window);
+		*pointer = (int) parametersVector[paramWindowManipulatingIndex].helper;
 		glutPostRedisplay();
-	}
+	}*/
 
 	parameterWindowLastPosX = x;
 }
@@ -147,14 +221,14 @@ void GetParameterWindowSize(int* size)
 	}
 
 	size[0] *= 9;
-	size[0] += PM_WINDOW_MARGIN_H * 2;
+	size[0] += PM_WINDOW_MARGIN_RIGHT + PM_WINDOW_MARGIN_LEFT;
 
 	std::cout << size[0] << ", " << size[1] << std::endl;
 }
 
 #include "binder.h"
 
-#define CENTER_CAMERA 0
+#define CENTER_CAMERA 1
 #define NEAR_CLIPPING_PLANE 1
 #define FAR_CLIPPING_PLANE 100
 #define FOV 40

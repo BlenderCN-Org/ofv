@@ -1,26 +1,26 @@
 #include "rtpmlib.h"
 
-int stepCount = 50;
+int stepCount = 50;					//	[1,150]
 
-float stepSize = 0.15;
-float stepHeight = 0.07;
+float stepSize = 0.15;				//	0.001
+float stepHeight = 0.07;			//	0.001
 float stepAngle = 2 * pi / 30;
-float thickness = 0.2;
+float thickness = 0.2;				//	0.001
 
 bool createRailings = true;
 bool createSideCap = true;
 
-float railingHOffset = 0.06;
-float railingVOffset = -0.03;
+float railingHOffset = 0.06;		//	0.001
+float railingVOffset = -0.03;		//	0.001
 
-float railingWidth = 0.05;
-float railingThickness = 0.05;
+float railingWidth = 0.05;			//	0.001
+float railingThickness = 0.05;		//	0.001
 
-int railingPipeEachXSteps = 3;
+int railingPipeEachXSteps = 3;		// [1,200]
 
-float railingPipeHeight = 0.7;
-int railingPipeRes = 1;
-float railingPipeRadius = 0.01;
+float railingPipeHeight = 0.7;		//	0.001
+int railingPipeRes = 1;				//	[1,50]
+float railingPipeRadius = 0.01;		//	0.0001
 float railingPipeTwistAngle = 0;
 int railingPipePolygonSides = 32;
 

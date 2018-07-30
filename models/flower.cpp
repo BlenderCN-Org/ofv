@@ -1,23 +1,26 @@
 #include "rtpmlib.h"
 #define DEG2RAD 0.017453292
 
-int petals = 8;
-float petalWidth = 0.5;
-float petalLength = 1;
-float petalHeight = .25;
+int seed = 1;
+int count = 10;// [3,30]
+
+int petals = 8;//[1,20]
+float petalWidth = 0.5;//0.05
+float petalLength = 1;//0.05
+float petalHeight = .25;//0.05
 int petalResZ = 6;
 int petalResX = 5;
-float radius = 0.1;
+float radius = 0.1;//0.005
 
 int ballResH = 12;
 int ballResV = 3;
 float ballHeight = 0.1;
 float ballOffset = -0.025;
 
-float ballMaxRadiusMultiplier = 2;
-float ballMinRadiusMultiplier = 1.5;
-float minPetalAngle = -7;
-float maxPetalAngle = 20;
+float ballMaxRadiusMultiplier = 2;//0.05
+float ballMinRadiusMultiplier = 1.5;//0.05
+float minPetalAngle = -7;//0.05
+float maxPetalAngle = 20;//0.05
 
 float rdm()
 {
@@ -26,6 +29,11 @@ float rdm()
 float rdm(float min, float max)
 {
 	return rdm() * (max - min) + min;
+}
+
+float absV(float v)
+{
+	return v < 0 ? v * -1 : v;
 }
 
 void petal(vec3 origin, vec3 dir, vec3 localUp, float width, float length, float height, int zRes, int xRes)
@@ -51,7 +59,7 @@ void petal(vec3 origin, vec3 dir, vec3 localUp, float width, float length, float
 		for (int j = 0; j < xRes; j++)
 		{
 			vec3 localPos(localRight * (fX * (-pow(fZ * 1.1 - 0.4, 2) + 0.5) * 2) * width + 
-									localUp * (-pow(fX, 2) + pow(abs(fX), 2.5) + pow(fZ, 2) + sin(fZ * 20) / 20) * height - localUp +
+									localUp * (-pow(fX, 2) + pow(absV(fX), 2.5) + pow(fZ, 2) + sin(fZ * 20) / 20) * height - localUp +
 									localForward * (fZ) * length);
 
 			vertices[i][j] = vertex(localPos + origin + localUp);
@@ -202,11 +210,11 @@ void stem(vec3 origin, vec3 direction, float stepLength, float radius, int sides
 
 void generateModel()
 {
-	srand(time(0));
+	srand(seed);
 
 	float size = 15;
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < count; i++)
 	{
 		vec3 origin(rdm() * size - size / 2,
 					0,
