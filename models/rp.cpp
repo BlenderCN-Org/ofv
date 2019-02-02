@@ -1,15 +1,13 @@
-#include <iostream>
-#include "pmlib/pmlib.h"
-using namespace std;
+#include "rtpmlib.h"
 
-int main()
+int n = 5;
+float radius = 1;
+
+void generateModel()
 {
-	int n = 5;
-	float radius = 1;
-	float angle = pi * 2 / n;
-	float theta = 0;
-	float phi = 0;
-
+float angle = pi * 2 / n;
+float theta = 0;
+float phi = 0;
 	int vertices[n];
 
 	for (int j = 0; j < n * (n - 1) / 2; j++)

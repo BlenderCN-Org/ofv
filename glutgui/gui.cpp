@@ -1,17 +1,36 @@
-#include <GL/glut.h>
-
-#include <iostream>
+ 
+#include <GL/gl.h>
+//#include <GL/freeglut.h>
+#include <GL/glut.h>   // freeglut.h might be a better alternative, if available.
 #include <string>
-#include <fstream>
-
-#include "cppmodel.h"
-
-int viewport_window, parameter_window;
+#include <vector>
+#include <iostream>
 
 #define PM_WINDOW_MARGIN_V 10
 #define PM_WINDOW_MARGIN_RIGHT 80
 #define PM_WINDOW_MARGIN_LEFT 20
 #define PM_WINDOW_ROW_HEIGHT 40
+
+float fVar;
+int iVar;
+bool bVar17;
+bool bVar16;
+bool bVar15;
+bool bVar14;
+bool bVar13;
+bool bVar12;
+bool bVar11;
+bool bVar10;
+bool bVar9;
+bool bVar8;
+bool bVar7;
+bool bVar6;
+bool bVar5;
+bool bVar4;
+bool bVar3;
+bool bVar2;
+bool bVar1;
+bool bVar0;
 
 struct parameter
 {
@@ -158,10 +177,10 @@ void parameterWindowMouse(int button, int state, int x, int y)
 			if (parametersVector[index].type == 'b')
 			{
 				parametersVector[index].modify(0);
-
+				//bool* pointer = (bool*) parametersVector[index].variable;
+				//*pointer = !*pointer;
 				glutPostRedisplay();
-				glutSetWindow(viewport_window);
-				glutPostRedisplay();
+				//std::cout << parametersVector[index].name << " = " << *pointer << std::endl;
 			}
 			else // float and int
 			{
@@ -187,8 +206,6 @@ void parameterWindowMouseMotion(int x, int y)
 	if (parametersVector[paramWindowManipulatingIndex].type != 'b')
 	{
 		parametersVector[paramWindowManipulatingIndex].modify(dX);
-		glutPostRedisplay();
-		glutSetWindow(viewport_window);
 		glutPostRedisplay();
 	}
 
@@ -226,195 +243,42 @@ void GetParameterWindowSize(int* size)
 	std::cout << size[0] << ", " << size[1] << std::endl;
 }
 
-#include "binder.h"
-
-#define CENTER_CAMERA 1
-#define NEAR_CLIPPING_PLANE 1
-#define FAR_CLIPPING_PLANE 100
-#define FOV 40
-#define ZOOM_SENSITIVITY 0.5
-#define MAX_CAMERA_DISTANCE 50
-#define MIN_CAMERA_DISTANCE 2
-#define X_ROT_SENSITIVITY 0.01
-#define Y_ROT_SENSITIVITY 0.01
-#define _360_DEG 6.283185307
-#define _90_DEG 1.57
-
-// camera orbit
-float cameraDistance = 11;
-int lastScreenCoor[2]; //
-bool orbit = false;
-vec3 cameraTarget;
-vec3 cameraPosition;
-float cameraTheta = 0, cameraPhi = 0;
-
-
-//scene
-GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};	/* White diffuse light. */
-GLfloat light_position[] = {0.5, 0.5, 1, 0};
-GLfloat ambient_light[] = {.8, .8, .8, 1};
-
-void calculateCameraPosition()
+int main( int argc, char** argv )
 {
-	cameraPosition.x = cameraTarget.x + cameraDistance * sin(cameraTheta) * cos(cameraPhi);
-	cameraPosition.y = cameraTarget.y + cameraDistance * sin(cameraPhi);
-	cameraPosition.z = cameraTarget.z + cameraDistance * cos(cameraTheta) * cos(cameraPhi);
-}
+	parametersVector.push_back(parameter("fVar", 'f', &fVar, 0.0001, -1, 1));
+	parametersVector.push_back(parameter("iVar", 'i', &iVar, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar17, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar16, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar15, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar14, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar13, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar12, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar11, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar10, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar9, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar8, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar7, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar6, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar5, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar4, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar3, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar2, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar1, 0.1, 0, 0));
+	parametersVector.push_back(parameter("bVar", 'b', &bVar0, 0.1, 0, 0));
 
-void display()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	clearModel();
-
-	maxCameraTargetPos = minCameraTargetPos = z;
-	generateModel(); // in cppmodel.h
-	if (CENTER_CAMERA)
-		cameraTarget = (maxCameraTargetPos + minCameraTargetPos) * 0.5;
-
-	calculateCameraPosition();
-
-	glLoadIdentity();
-	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
-				cameraTarget.x, cameraTarget.y, cameraTarget.z,
-				0, 1, 0);
-
-	glutSwapBuffers();
-}
-
-void init()
-{
-	/* Enable a single OpenGL light. */
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
-
-	/* Set background color */
-	glClearColor(.95, .95, .95, 1);
-
-	/* Use depth buffering for hidden surface elimination. */
-	glEnable(GL_DEPTH_TEST);
-
-	/* Setup the view of the cube. */
-	glMatrixMode(GL_PROJECTION);
-	gluPerspective(
-		/* field of view in degree */ FOV,
-		/* aspect ratio */ 1.0,
-		/* Z near */ NEAR_CLIPPING_PLANE,
-		/* Z far */ FAR_CLIPPING_PLANE);
-
-	glMatrixMode(GL_MODELVIEW);
-
-	calculateCameraPosition();
-	glLoadIdentity();
-	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
-			cameraTarget.x, cameraTarget.y, cameraTarget.z,
-			0, 1, 0);
-}
-
-void mouseMotion(int x, int y)
-{
-	if (orbit)
-	{
-		int dX = x - lastScreenCoor[0];
-		int dY = y - lastScreenCoor[1];
-
-		cameraTheta -= dX * X_ROT_SENSITIVITY;
-		cameraPhi += dY * Y_ROT_SENSITIVITY;
-
-		// clamp
-		if (cameraTheta > _360_DEG)
-			cameraTheta = 0;
-		else if (cameraTheta < 0)
-			cameraTheta = _360_DEG;
-		if (cameraPhi > _90_DEG)
-			cameraPhi = _90_DEG;
-		else if (cameraPhi < -_90_DEG)
-			cameraPhi = -_90_DEG;
-
-		lastScreenCoor[0] = x;
-		lastScreenCoor[1] = y;
-		glutPostRedisplay();
-	}
-}
-void mouse(int button, int state, int x, int y)
-{
-	if (button == GLUT_LEFT_BUTTON) 
-	{ 
-		if (state == GLUT_DOWN)
-		{
-			orbit = true;
-			lastScreenCoor[0] = x;
-			lastScreenCoor[1] = y;
-		}
-		else if (state == GLUT_UP)
-		{
-			orbit = false;
-		}
-	}
-	else if (button == 3) // zoom in
-	{
-		cameraDistance -= ZOOM_SENSITIVITY;
-		if (cameraDistance < MIN_CAMERA_DISTANCE)
-			cameraDistance = MIN_CAMERA_DISTANCE;
-		glutPostRedisplay();
-	}
-	else if (button == 4)
-	{
-		cameraDistance += ZOOM_SENSITIVITY; // zoom out
-		if (cameraDistance > MAX_CAMERA_DISTANCE)
-			cameraDistance = MAX_CAMERA_DISTANCE;
-		glutPostRedisplay();
-	}
-}
-
-void reshape(int width, int height)
-{
-		if (height == 0 || width == 0)
-			return;
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(FOV, (GLdouble)width/(GLdouble)height, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
-		glMatrixMode(GL_MODELVIEW);
-		glViewport(0, 0, width,height);
-}
-
-int main(int argc, char** argv)
-{
-	bindParameters();
 	GetParameterWindowSize(parameterWindowSize);
 
-	minCameraTargetPos.x = minCameraTargetPos.y = minCameraTargetPos.z = 0;
-	maxCameraTargetPos.x = maxCameraTargetPos.y = maxCameraTargetPos.z = 0;
-
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
-	glEnable(GL_MULTISAMPLE);
-
-	glutInitWindowSize(600, 600);
-	viewport_window = glutCreateWindow("viewport");
-	glutDisplayFunc(display);
-
-	glutMotionFunc(mouseMotion);
-	glutMouseFunc(mouse);
-
-	glutReshapeFunc(reshape);
-
-	init();
-
-	glutInitDisplayMode(GLUT_SINGLE);    // Use single color buffer and no depth buffer.
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE);    // Use single color buffer and no depth buffer.
     glutInitWindowSize(parameterWindowSize[0], parameterWindowSize[1]);         // Size of display area, in pixels.
     glutInitWindowPosition(100, 100);     // Location of window in screen coordinates.
-    parameter_window = glutCreateWindow("parameters"); // Parameter is window title.
+    glutCreateWindow("parameters"); // Parameter is window title.
     glutDisplayFunc(parameterWindowDisplay);            // Called when the window needs to be redrawn.
     
 	glutMouseFunc(parameterWindowMouse);
 	glutMotionFunc(parameterWindowMouseMotion);
+    glutMainLoop(); // Run the event loop!  This function does not return.
+                    // Program ends when user closes the window.
+    return 0;
 
-	glutMainLoop();
-
-	return 0;
 }
